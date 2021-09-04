@@ -1,9 +1,13 @@
 package com.agripedia.app.config;
 
+import com.agripedia.app.SpringApplicationContext;
+import com.agripedia.app.service.UserService;
+import com.agripedia.app.shared.dto.UserDto;
 import com.agripedia.app.ui.model.request.UserLoginRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -50,6 +54,11 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                 .setExpiration(new Date(System.currentTimeMillis() + SecurityConstant.EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS256, SecurityConstant.TOKEN_SECRET)
                 .compact();
+        UserService userService = (UserService) SpringApplicationContext.getBean("userServiceImpl");
+        UserDto userDto = userService.getUser(userName);
         response.addHeader(SecurityConstant.HEADER_STRING, SecurityConstant.TOKEN_PREFIX + token);
+        response.addHeader("UserID", userDto.getUserId());
+
+
     }
 }
