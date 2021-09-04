@@ -1,5 +1,7 @@
 package com.agripedia.app.ui.controller;
 
+import com.agripedia.app.entity.UserEntity;
+import com.agripedia.app.repository.UserRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,10 +25,14 @@ public class UserController {
 	
 	@Autowired
 	UserService userService;
-	
+
+	@Autowired
+	UserRepository userRepository;
+
 	@GetMapping
-	public String getUser() {
-		return "get user was called";
+	public UserEntity getUser() {
+		UserEntity user = userRepository.findByEmail("hapidun@gmail.com");
+		return user;
 	}
 	
 	@PostMapping

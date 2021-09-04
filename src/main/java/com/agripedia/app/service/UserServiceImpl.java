@@ -5,15 +5,17 @@ import com.agripedia.app.repository.UserRepository;
 import com.agripedia.app.util.RandomUserId;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.agripedia.app.shared.dto.UserDto;
 
 import javax.persistence.NonUniqueResultException;
+import java.util.ArrayList;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -26,6 +28,7 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	PasswordEncoder passwordEncoder;
+
 
 	@Override
 	public UserDto createUser(UserDto user) {
@@ -43,7 +46,9 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
-		return null;
+	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+		UserEntity user = userRepository.findByEmail(email);
+		if (user == null) throw new UsernameNotFoundException(email);
+		return new User(user.getEmail(), user.getEncryptedPassword(), new ArrayList<>());
 	}
 }
