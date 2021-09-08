@@ -16,6 +16,7 @@ import com.agripedia.app.shared.dto.UserDto;
 
 import javax.persistence.NonUniqueResultException;
 import java.util.ArrayList;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -52,6 +53,17 @@ public class UserServiceImpl implements UserService {
 		UserDto returnValue = new UserDto();
 		BeanUtils.copyProperties(user, returnValue);
 		return returnValue;
+	}
+
+	@Override
+	public Optional<UserEntity> getUserByUserId(String id) {
+		Optional<UserEntity> user = userRepository.findByUserId(id);
+		//UserDto userDto = new UserDto();
+//		UserRest userRest = new UserRest();
+//		UserDto userDto = new UserDto();
+//		BeanUtils.copyProperties(user, userDto);
+//		BeanUtils.copyProperties(userDto, userRest);
+		return user;
 	}
 
 	@Override
