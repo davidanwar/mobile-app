@@ -1,7 +1,10 @@
 package com.agripedia.app.service;
 
 import com.agripedia.app.entity.UserEntity;
+import com.agripedia.app.exception.UserServiceException;
 import com.agripedia.app.repository.UserRepository;
+import com.agripedia.app.ui.model.response.ErrorMessages;
+import com.agripedia.app.ui.model.response.UserRest;
 import com.agripedia.app.util.RandomUserId;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,14 +59,26 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Optional<UserEntity> getUserByUserId(String id) {
-		Optional<UserEntity> user = userRepository.findByUserId(id);
-		//UserDto userDto = new UserDto();
-//		UserRest userRest = new UserRest();
-//		UserDto userDto = new UserDto();
-//		BeanUtils.copyProperties(user, userDto);
-//		BeanUtils.copyProperties(userDto, userRest);
+	public UserEntity getUserByUserId(String id) {
+		UserEntity user = userRepository.findByUserId(id);
+
+		UserRest userRest = new UserRest();
+		UserDto userDto = new UserDto();
+		BeanUtils.copyProperties(user, userDto);
+		BeanUtils.copyProperties(userDto, userRest);
 		return user;
+	}
+
+	@Override
+	public UserDto updateUser(UserDto userDto, String id) {
+		UserDto returnValue = new UserDto();
+		UserEntity user = userRepository.findByUserId(id);
+		if (user == null) throw new UserServiceException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
+		user.setFirstName(userDto.getFirstName());
+		user.setLastName(userDto.getLastName());
+		UserEntity updateUser = userRepository.save(user);
+		BeanUtils.copyProperties(updateUser, returnValue);
+		return returnValue;
 	}
 
 	@Override

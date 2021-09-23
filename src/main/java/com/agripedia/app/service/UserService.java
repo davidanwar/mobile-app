@@ -10,5 +10,6 @@ import java.util.Optional;
 public interface UserService extends UserDetailsService {
 	UserDto createUser(UserDto user);
 	UserDto getUser(String email);
-    Optional<UserEntity> getUserByUserId(String id);
+    UserEntity getUserByUserId(String id);
+    UserDto updateUser(UserDto userDto, String id);
 }

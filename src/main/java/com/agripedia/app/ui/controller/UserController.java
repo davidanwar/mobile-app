@@ -2,6 +2,7 @@ package com.agripedia.app.ui.controller;
 
 import com.agripedia.app.config.SecurityConstant;
 import com.agripedia.app.entity.UserEntity;
+import com.agripedia.app.exception.UserServiceException;
 import com.agripedia.app.repository.UserRepository;
 import com.agripedia.app.ui.model.response.ErrorMessages;
 import io.jsonwebtoken.Jwts;
@@ -35,8 +36,8 @@ public class UserController {
 	UserRepository userRepository;
 
 	@GetMapping(path = "/{id}")
-	public Optional<UserEntity> getUser(@PathVariable(value = "id") String id) {
-		Optional<UserEntity> returnValue = userService.getUserByUserId(id);
+	public UserEntity getUser(@PathVariable(value = "id") String id) {
+		UserEntity returnValue = userService.getUserByUserId(id);
 		//UserDto userDto =
 		//BeanUtils.copyProperties(userDto, returnValue);
 		return returnValue;
@@ -45,7 +46,7 @@ public class UserController {
 	@PostMapping
 	public UserRest createUser(@RequestBody UserDetailRequest userDetails) throws Exception {
 		UserRest returnValue = new UserRest();
-		if (userDetails.getEmail().isEmpty()) throw new Exception(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
+		if (userDetails.getEmail().isEmpty()) throw new UserServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
 		UserDto userDto = new UserDto();
 		BeanUtils.copyProperties(userDetails, userDto);
 		UserDto createUser = userService.createUser(userDto);
@@ -53,8 +54,8 @@ public class UserController {
 		return returnValue;
 	}
 	
-	@PutMapping
-	public String updateUser() {
+	@GetMapping("/token")
+	public String getToken() {
 		String token = request.getHeader(SecurityConstant.HEADER_STRING);
 		token = token.replace(SecurityConstant.TOKEN_PREFIX, "");
 		String user = Jwts.parser()
@@ -66,7 +67,17 @@ public class UserController {
 		LOG.info("USER {}", user);
 		return "Update";
 	}
-	
+
+	@PutMapping("/{id}")
+	public UserRest updateUser(@RequestBody UserDetailRequest userDetails, @PathVariable(value = "id") String id) {
+		UserRest returnValue = new UserRest();
+		UserDto userDto = new UserDto();
+		BeanUtils.copyProperties(userDetails, userDto);
+		UserDto updatedUser = userService.updateUser(userDto, id);
+		BeanUtils.copyProperties(updatedUser, returnValue);
+		return returnValue;
+	}
+
 	@DeleteMapping
 	public String deleteUser() {
 		return "delete user was called";
