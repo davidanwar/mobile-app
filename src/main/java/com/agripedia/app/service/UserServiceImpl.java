@@ -3,9 +3,11 @@ package com.agripedia.app.service;
 import com.agripedia.app.entity.UserEntity;
 import com.agripedia.app.exception.UserServiceException;
 import com.agripedia.app.repository.UserRepository;
+import com.agripedia.app.shared.dto.AddressDto;
 import com.agripedia.app.ui.model.response.ErrorMessages;
 import com.agripedia.app.ui.model.response.UserRest;
 import com.agripedia.app.util.RandomUserId;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -19,6 +21,7 @@ import com.agripedia.app.shared.dto.UserDto;
 
 import javax.persistence.NonUniqueResultException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -36,16 +39,23 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserDto createUser(UserDto user) {
+
 		UserEntity userStored =  userRepository.findByEmail(user.getEmail());
 		if (userStored != null) throw new NonUniqueResultException("User Already Exist");
-		UserEntity userEntity = new UserEntity();
-		BeanUtils.copyProperties(user, userEntity);
-		String publicUserId = randomUserId.generateUserId(30);
+		for (int i = 0; i < user.getAddresses().size(); i++) {
+			AddressDto address = user.getAddresses().get(i);
+			address.setUserDetails(user);
+			address.setAddressId(randomUserId.generateId(30));
+			user.getAddresses().set(i, address);
+		}
+		//BeanUtils.copyProperties(user, userEntity);
+		ModelMapper modelMapper = new ModelMapper();
+		UserEntity userEntity = modelMapper.map(user, UserEntity.class);
+		String publicUserId = randomUserId.generateId(30);
 		userEntity.setEncryptedPassword(passwordEncoder.encode(user.getPassword()));
 		userEntity.setUserId(publicUserId);
 		UserEntity storedUserDetail = userRepository.save(userEntity);
-		UserDto returnValue = new UserDto();
-		BeanUtils.copyProperties(storedUserDetail, returnValue);
+		UserDto returnValue = modelMapper.map(storedUserDetail, UserDto.class);
 		return returnValue;
 	}
 
@@ -79,6 +89,11 @@ public class UserServiceImpl implements UserService {
 		UserEntity updateUser = userRepository.save(user);
 		BeanUtils.copyProperties(updateUser, returnValue);
 		return returnValue;
+	}
+
+	@Override
+	public List<AddressDto> getAddress(String id) {
+		return null;
 	}
 
 	@Override

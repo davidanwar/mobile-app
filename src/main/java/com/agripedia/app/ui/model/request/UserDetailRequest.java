@@ -1,10 +1,13 @@
 package com.agripedia.app.ui.model.request;
 
+import java.util.List;
+
 public class UserDetailRequest {
 	private String firstName;
 	private String lastName;
 	private String email;
 	private String password;
+	private List<AddressRequest> addresses;
 
 	public String getFirstName() {
 		return firstName;
@@ -30,6 +33,10 @@ public class UserDetailRequest {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	
-	
+	public List<AddressRequest> getAddresses() {
+		return addresses;
+	}
+	public void setAddresses(List<AddressRequest> addresses) {
+		this.addresses = addresses;
+	}
 }

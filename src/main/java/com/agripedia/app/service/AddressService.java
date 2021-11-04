@@ -1,0 +1,12 @@
+package com.agripedia.app.service;
+
+import com.agripedia.app.shared.dto.AddressDto;
+
+import java.util.List;
+
+public interface AddressService {
+
+    List<AddressDto> getAddresses(String userId);
+
+    AddressDto getAddress(String addressId);
+}

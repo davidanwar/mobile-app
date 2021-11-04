@@ -1,9 +1,11 @@
 package com.agripedia.app.service;
 
 import com.agripedia.app.entity.UserEntity;
+import com.agripedia.app.shared.dto.AddressDto;
 import com.agripedia.app.shared.dto.UserDto;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -12,4 +14,5 @@ public interface UserService extends UserDetailsService {
 	UserDto getUser(String email);
     UserEntity getUserByUserId(String id);
     UserDto updateUser(UserDto userDto, String id);
+    List<AddressDto> getAddress(String id);
 }
