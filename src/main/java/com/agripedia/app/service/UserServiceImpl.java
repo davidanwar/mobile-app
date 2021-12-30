@@ -6,11 +6,14 @@ import com.agripedia.app.repository.UserRepository;
 import com.agripedia.app.shared.dto.AddressDto;
 import com.agripedia.app.ui.model.response.ErrorMessages;
 import com.agripedia.app.ui.model.response.UserRest;
+import com.agripedia.app.util.AmazonSES;
 import com.agripedia.app.util.RandomUserId;
+import com.agripedia.app.util.Utils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -54,8 +57,11 @@ public class UserServiceImpl implements UserService {
 		String publicUserId = randomUserId.generateId(30);
 		userEntity.setEncryptedPassword(passwordEncoder.encode(user.getPassword()));
 		userEntity.setUserId(publicUserId);
+		userEntity.setEmailVerification(Utils.generateEmailVerificationToken(publicUserId));
+		userEntity.setEmailVerificationStatus(false);
 		UserEntity storedUserDetail = userRepository.save(userEntity);
 		UserDto returnValue = modelMapper.map(storedUserDetail, UserDto.class);
+		new AmazonSES().verifyEmail(returnValue);
 		return returnValue;
 	}
 
@@ -97,9 +103,31 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public boolean verifyEmailToken(String token) {
+		boolean returnValue = false;
+		UserEntity user = userRepository.findByEmailVerification(token);
+		if (user != null) {
+			boolean hasTokenExpired = Utils.hasTokenExpired(token);
+			if (!hasTokenExpired) {
+				user.setEmailVerification(null);
+				user.setEmailVerificationStatus(Boolean.TRUE);
+				userRepository.save(user);
+				returnValue = true;
+			}
+		}
+		return returnValue;
+	}
+
+	@Override
 	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 		UserEntity user = userRepository.findByEmail(email);
 		if (user == null) throw new UsernameNotFoundException(email);
-		return new User(user.getEmail(), user.getEncryptedPassword(), new ArrayList<>());
+		return new User(
+				user.getEmail(),
+				user.getEncryptedPassword(),
+				user.getEmailVerificationStatus(),
+				true, true, true,
+				new ArrayList<>());
+		//return new User(user.getEmail(), user.getEncryptedPassword(), new ArrayList<>());
 	}
 }

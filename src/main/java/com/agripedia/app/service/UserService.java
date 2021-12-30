@@ -15,4 +15,5 @@ public interface UserService extends UserDetailsService {
     UserEntity getUserByUserId(String id);
     UserDto updateUser(UserDto userDto, String id);
     List<AddressDto> getAddress(String id);
+    boolean verifyEmailToken(String token);
 }

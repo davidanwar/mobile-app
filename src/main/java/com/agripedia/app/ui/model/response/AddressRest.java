@@ -1,6 +1,7 @@
 package com.agripedia.app.ui.model.response;
 
 import com.agripedia.app.shared.dto.UserDto;
+import org.springframework.hateoas.RepresentationModel;
 
 public class AddressRest {
 
